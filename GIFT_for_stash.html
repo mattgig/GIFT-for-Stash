@@ -1,40 +1,86 @@
 <html>
 <body>
-<h1>Generator für MC-Fragen</h1>
-<p>Dieses Script generiert MC-Fragen für Moodle im GIFT-Format</p>
-<script>
+  <h1>Generator für MC-Fragen</h1>
+  <p>Dieses Script generiert MC-Fragen für Moodle im GIFT-Format</p>
+  <script>
 
-function randnum(length)
-  {
-  return Math.floor(Math.random()*length);
-  }
-
-// Hier die Codes für die Monster einfügen
-// Die Codes in einfache Hochkommas einfügen und durch Kommata trennen
-var codes = ['4grJOE','qGwRbs','gDvlSL','GhCg53'];
-
-// Hier die anzuzeigende Mitteilung einfügen
-var message = "Wähle mich!";
-
-// Anzahl der zu generierenden Fragen
-var anzahl = 10;
-
-// Anzahl der Antwortoptionen pro Frage
-var optionen = 4;
-
-// Generierung der einzelnen Fragen
-for (i=1;i<=anzahl;i++)
-  {
-  document.write('<p>::Frage',i,'::<br>Wähle eine Option aus.{<br>')
-  for (j=0;j<optionen;j++)
-    {
-	var addstr = "";
-	if (j>0) addstr="~";
-    document.write('',addstr,'=Wähle mich!#[stashdrop secret\\="',
-	codes[randnum(codes.length)],'" text\\="',message,'" image]<br>');
+    function randnum(length) {
+      return Math.floor(Math.random() * length);
     }
-	document.write('}<br>')
-  }
-</script>
+
+    // Array für die Codes
+    var codes = [];
+
+    // Hier die anzuzeigende Mitteilung einfügen
+    var message = "Wähle mich!";
+
+    // Anzahl der zu generierenden Fragen
+    var anzahl;
+
+    // Anzahl der Antwortoptionen pro Frage
+    var optionen;
+
+    // Funktion zum Hinzufügen eines neuen Inputfelds
+    function addInput() {
+      var inputContainer = document.getElementById("input-container");
+      var newInput = document.createElement("input");
+      newInput.type = "text";
+      newInput.name = "code[]";
+      inputContainer.appendChild(newInput);
+    }
+
+    // Funktion zum Generieren der Fragen
+    function generateQuestions() {
+      // Array mit den eingegebenen Codes erstellen
+      var codeInputs = document.getElementsByName("code[]");
+      for (var i = 0; i < codeInputs.length; i++) {
+        codes.push(codeInputs[i].value);
+      }
+      // Anzahl der Antwortoptionen aktualisieren
+      optionen = document.getElementById("optionen-auswahl").value;
+      // Anzahl der Fragen aktualisieren
+      anzahl = document.getElementById("anzahl-auswahl").value;
+      // Fragen generieren
+      var fragenContainer = document.getElementById("fragen-container");
+      fragenContainer.innerHTML = ""; // Löschen des Inhalts des Containers
+      for (var i = 1; i <= anzahl; i++) {
+        var frage = document.createElement("p");
+        frage.innerHTML = "::Frage" + i + "::<br>Wähle eine Option aus.{<br>";
+        for (var j = 0; j < optionen; j++) {
+          var addstr = "";
+          if (j > 0) addstr = "~";
+          var antwort = document.createElement("span");
+          antwort.innerHTML = addstr + "=Wähle mich!#[stashdrop secret\\=\"" + codes[randnum(codes.length)] + "\" text\\=\"" + message + "\" image]<br>";
+          frage.appendChild(antwort);
+        }
+        var endbr = document.createElement("span");
+        endbr.innerHTML = "}<br>";
+        frage.appendChild(endbr);
+        fragenContainer.appendChild(frage);
+      }
+    }
+
+  </script>
+
+  <!-- Inputfelder für die Codes -->
+   <div style="display: flex">
+  <div id="input-container">
+    <input type="text" name="code[]" value="">
+    <input type="text" name="code[]" value="">
+    <input type="text" name="code[]" value="">
+    <input type="text" name="code[]" value="">
+  </div><button onclick="addInput()">Weiteren Code hinzufügen</button>
+  </div><div>
+  
+  <!-- Auswahlfeld für die Anzahl der Antwortoptionen -->
+  <p>Anzahl der Antwortoptionen:</p>
+  <input id="optionen-auswahl" type="number" id="tentacles" name="tentacles" min="1" max="10" value="4">
+ <!-- Auswahlfeld für die Anzahl der Fragen -->
+  <p>Anzahl der zu generierenden Fragen:</p>
+  <input id="anzahl-auswahl" type="number" id="tentacles" name="tentacles" min="1" max="30" value="10">
+  <!-- Button zum Generieren der Fragen -->
+  <button onclick="generateQuestions()">Fragen generieren</button>
+  <!-- Container für die generierten Fragen -->
+  <div id="fragen-container"></div>
 </body>
 </html>
