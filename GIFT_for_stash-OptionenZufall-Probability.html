@@ -1,0 +1,67 @@
+<html>
+<body>
+<h1>Generator für MC-Fragen</h1>
+<p>Dieses Script generiert MC-Fragen für Moodle im GIFT-Format</p>
+<script>
+
+function randnum(length)
+  {
+  return Math.floor(Math.random()*length);
+  }
+
+// Hier die Codes für die Sammelobjekte einfügen
+// Die Codes in einfache Hochkommas einfügen und durch Kommata trennen
+var codes = ['4grJOE','qGwRbs','gDvlSL','GhCg53'];
+
+//Hier die Vielfachheit für die Objekte eingeben. Achtung Reihenfolge und Anzahl muss zu oberer Liste (codes) passen. Im einfachsten Fall, einfach so oft 1 reinschreiben, wie Objekte vorhanden, dann sind alle gleichwahrscheinlich.
+var vielfachheit = [1,1,1,8];
+
+//Hier werden automatisch alle Objekte mit ihrer Vielfachheit in die Liste zugefügt, aus der zufällig die Antwortoptionen zu jeder Frage gewählt werden.
+var vcodes =[];
+
+for (j=0;j<codes.length;j++)
+    {
+        for (i=0;i<vielfachheit[j];i++)
+        {
+            vcodes.push(codes[j]);
+        }
+    }
+
+
+
+    //Gibt den fertigen Array aus: Zu Testzwecken
+    //document.write(vcodes);
+
+
+// Hier die anzuzeigende Mitteilung einfügen
+var message = "Einsammeln";
+
+// Anzahl der zu generierenden Fragen
+var anzahl = 10;
+
+// Minimaleanzahl der Antwortoptionen pro Frage
+var optionen_min = 4;
+
+// Maximaleanzahl der Antwortoptionen pro Frage
+var optionen_max = 8;
+
+// Generierung der einzelnen Fragen
+for (i=1;i<=anzahl;i++)
+  {
+  document.write('<p>::Frage',i,'::<br>Wähle eine Belohnung aus.{<br>')
+
+    // Anzahl der Antwortoptionen pro Frage
+var optionen = optionen_min+Math.floor(Math.random()*(optionen_max-optionen_min));
+  for (j=0;j<optionen;j++)
+    {
+	var addstr = "";
+  
+	if (j>0) addstr="~";
+    document.write('',addstr,'= Diese Belohnung auswählen! #[stashdrop secret\\="',
+	vcodes[randnum(vcodes.length)],'" text\\="',message,'" image]<br>');
+    }
+	document.write('}<br>')
+  }
+</script>
+</body>
+</html>
