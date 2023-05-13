@@ -1,4 +1,8 @@
 <html>
+<head>
+<!-- https://github.com/eligrey/FileSaver.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
 <body>
   <h1>Generator für MC-Fragen</h1>
   <p>Dieses Script generiert MC-Fragen für Moodle im GIFT-Format</p>
@@ -58,6 +62,8 @@
         frage.appendChild(endbr);
         fragenContainer.appendChild(frage);
       }
+     var myFile = new File([fragenContainer.innerText], "GIFTforStash.txt", {type: "text/plain;charset=utf-8"});
+     saveAs(myFile);
     }
 
   </script>
