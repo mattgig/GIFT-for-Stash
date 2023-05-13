@@ -67,14 +67,20 @@
     }
 
   </script>
-
+    <!-- Dateiupload -->
+  <p>Codes per Datei hochladen: <input type="file" id="file-input" onchange="handleFileUpload()"></p>
+  <details><summary>Dateiformat</summary>
+  <ul>
+    <li>Lade eine Datei mit einer Liste der secret-Codes hoch (eine Zeile ein Code)</li>
+    <li>Oder lade eine Datei mit einer Liste der Shortcodes hoch (eine Zeile ein Shortcode)</li>
+  </ul>
+  </details><br>
   <!-- Inputfelder für die Codes -->
    <div style="display: flex">
   <div id="input-container">
-    <input type="text" name="code[]" value="">
-    <input type="text" name="code[]" value="">
-   </div><button onclick="addInput()">Weiteren Code hinzufügen</button>
-  </div>
+    <input type="text" name="code[]" value=""><input type="text" name="code[]" value=""></div>
+  </div><br>
+  <button onclick="addInput()">Weiteren Code hinzufügen</button>
  
   <!-- Auswahlfeld für die Anzahl der Antwortoptionen -->
   <p>Anzahl der Antwortoptionen:</p>
@@ -86,5 +92,79 @@
   <button onclick="generateQuestions()">Fragen generieren</button>
   <!-- Container für die generierten Fragen -->
   <div id="fragen-container"></div>
+
+  <script>
+    function addInput() {
+      var inputContainer = document.getElementById("input-container");
+      var newInput = document.createElement("input");
+      newInput.type = "text";
+      newInput.name = "code[]";
+      newInput.value = "";
+      inputContainer.appendChild(newInput);
+    }
+    function handleFileUpload() {
+      var fileInput = document.getElementById("file-input");
+      var file = fileInput.files[0];
+      var reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = function (event) {
+        var inputContainer = document.getElementById("input-container");
+        var codes = [];
+        var text = event.target.result;
+        if (text.indexOf("[stashdrop") !== -1) {
+          // Shortcode format
+          var matches = text.match(/secret="([^"]+)"/g);
+          if (matches) {
+            for (var i = 0; i < matches.length; i++) {
+              var code = matches[i].match(/secret="([^"]+)"/)[1];
+              codes.push(code);
+              if (i >= 2) {
+                // Nur neue Input-Felder füllen
+                var newInput = document.createElement("input");
+                newInput.type = "text";
+                newInput.name = "code[]";
+                newInput.value = code;
+                inputContainer.appendChild(newInput);
+              }
+            }
+            // Die ersten beiden Werte in die zwei existrierenden Inputs füllen
+            var existingInputs = document.querySelectorAll("#input-container input.existing-input");
+            for (var i = 0; i < 2 && i < existingInputs.length && i < codes.length; i++) {
+              existingInputs[i].value = codes[i];
+            }
+            // Die ersten beiden Werte entfernen
+            codes.splice(0, 2);
+          } 
+        } else {
+          // CSV format
+          codes = text.split("\n");
+          for (var i = 0; i < codes.length; i++) {
+            if (i >= 2) {
+              // Nur neue Input-Felder füllen
+              var newInput = document.createElement("input");
+              newInput.type = "text";
+              newInput.name = "code[]";
+              newInput.value = codes[i];
+              inputContainer.appendChild(newInput);
+            }
+          }
+          // Die ersten beiden Werte in die zwei existrierenden Inputs füllen
+          var existingInputs = document.querySelectorAll("#input-container input.existing-input");
+          for (var i = 0; i < 2 && i < existingInputs.length && i < codes.length; i++) {
+            existingInputs[i].value = codes[i];
+          }
+          // Die ersten beiden Werte entfernen
+          codes.splice(0, 2);
+        }
+
+      }
+    }
+
+    // Existierende Inputs markieren
+    var existingInputs = document.getElementsByName("code[]");
+    for (var i = 0; i < existingInputs.length; i++) {
+      existingInputs[i].classList.add("existing-input");
+    }
+  </script>
 </body>
 </html>
