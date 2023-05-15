@@ -1,9 +1,10 @@
-<html>
+<!DOCTYPE html>
 <head>
 <!-- https://github.com/eligrey/FileSaver.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
+  <style>input[name="code_weight[]"] {width: 50px;}</style>
   <h1>Generator für MC-Fragen</h1>
   <p>Dieses Script generiert MC-Fragen für Moodle im GIFT-Format</p>
   <script>
@@ -25,21 +26,32 @@
     var optionen;
 
     // Funktion zum Hinzufügen eines neuen Inputfelds
-    function addInput() {
-      var inputContainer = document.getElementById("input-container");
-      var newInput = document.createElement("input");
-      newInput.type = "text";
-      newInput.name = "code[]";
-      inputContainer.appendChild(newInput);
-    }
 
-    // Funktion zum Generieren der Fragen
-    function generateQuestions() {
-      // Array mit den eingegebenen Codes erstellen
-      var codeInputs = document.getElementsByName("code[]");
-      for (var i = 0; i < codeInputs.length; i++) {
-        codes.push(codeInputs[i].value);
-      }
+ // Funktion zum Generieren der Fragen
+ function generateQuestions() {
+// Array mit den eingegebenen Codes und Gewichten erstellen
+var codeInputs = document.getElementsByName("code[]");
+var weightInputs = document.getElementsByName("code_weight[]");
+var codes = [];
+var weights = [];
+
+// Codes und Gewichte aus den Input-Feldern auslesen und in Arrays speichern
+for (var i = 0; i < codeInputs.length; i++) {
+  codes.push(codeInputs[i].value);
+  weights.push(parseInt(weightInputs[i].value));
+}
+
+// Anzahl der jeweiligen Codes um das entsprechende Gewicht erhöhen
+for (var i = 0; i < codes.length; i++) {
+  for (var j = 0; j < weights[i]; j++) {
+    codes.push(codes[i]);
+  }
+}
+console.log(codes);
+// Das ursprüngliche Array mit den Codes kann nun entfernt werden
+codes.splice(0, codeInputs.length);
+
+
       // Anzahl der Antwortoptionen aktualisieren
       optionen = document.getElementById("optionen-auswahl").value;
       // Anzahl der Fragen aktualisieren
@@ -71,15 +83,14 @@
   <p>Codes per Datei hochladen: <input type="file" id="file-input" onchange="handleFileUpload()"></p>
   <details><summary>Dateiformat</summary>
   <ul>
-    <li>Lade eine Datei mit einer Liste der secret-Codes hoch (eine Zeile ein Code)</li>
-    <li>Oder lade eine Datei mit einer Liste der Shortcodes hoch (eine Zeile ein Shortcode)</li>
+    <li>Lade eine Datei mit einer Liste der secret-Codes hoch (eine Zeile ein Code, Gewichtung mit Komma getrennt eintragen).<br><br>Beispiel:<br>Ztn87,4<br>6hdhn,2<br>Ize45hn,3<br><br></li>
+    <li>Oder lade eine Datei mit einer Liste der Shortcodes hoch (eine Zeile ein Shortcode, Gewichtung direkt dahinter eintragen).<br><br>Beispiel:<br>[stashdrop secret="Ztn87" text="Pick up!" image]4<br>[stashdrop secret="6hdhn" text="Pick up!" image]2<br>[stashdrop secret="Ize45hn text="Pick up!" image]3</li>
   </ul>
   </details><br>
   <!-- Inputfelder für die Codes -->
    <div style="display: flex">
   <div id="input-container">
-    <input type="text" name="code[]" value=""><input type="text" name="code[]" value=""></div>
-  </div><br>
+  <input type="text" name="code[]" value=""><input type="number" name="code_weight[]" value="1"><br><input type="text" name="code[]" value=""><input type="number" name="code_weight[]" value="1"><br></div></div><br>
   <button onclick="addInput()">Weiteren Code hinzufügen</button>
  
   <!-- Auswahlfeld für die Anzahl der Antwortoptionen -->
@@ -94,76 +105,141 @@
   <div id="fragen-container"></div>
 
   <script>
-    function addInput() {
+function addInput() {
       var inputContainer = document.getElementById("input-container");
       var newInput = document.createElement("input");
       newInput.type = "text";
       newInput.name = "code[]";
-      newInput.value = "";
-      inputContainer.appendChild(newInput);
-    }
-    function handleFileUpload() {
-      var fileInput = document.getElementById("file-input");
-      var file = fileInput.files[0];
-      var reader = new FileReader();
-      reader.readAsText(file);
-      reader.onload = function (event) {
-        var inputContainer = document.getElementById("input-container");
-        var codes = [];
-        var text = event.target.result;
-        if (text.indexOf("[stashdrop") !== -1) {
-          // Shortcode format
-          var matches = text.match(/secret="([^"]+)"/g);
-          if (matches) {
-            for (var i = 0; i < matches.length; i++) {
-              var code = matches[i].match(/secret="([^"]+)"/)[1];
-              codes.push(code);
-              if (i >= 2) {
-                // Nur neue Input-Felder füllen
-                var newInput = document.createElement("input");
-                newInput.type = "text";
-                newInput.name = "code[]";
-                newInput.value = code;
-                inputContainer.appendChild(newInput);
-              }
-            }
-            // Die ersten beiden Werte in die zwei existrierenden Inputs füllen
-            var existingInputs = document.querySelectorAll("#input-container input.existing-input");
-            for (var i = 0; i < 2 && i < existingInputs.length && i < codes.length; i++) {
-              existingInputs[i].value = codes[i];
-            }
-            // Die ersten beiden Werte entfernen
-            codes.splice(0, 2);
-          } 
-        } else {
-          // CSV format
-          codes = text.split("\n");
-          for (var i = 0; i < codes.length; i++) {
-            if (i >= 2) {
-              // Nur neue Input-Felder füllen
-              var newInput = document.createElement("input");
-              newInput.type = "text";
-              newInput.name = "code[]";
-              newInput.value = codes[i];
-              inputContainer.appendChild(newInput);
-            }
-          }
-          // Die ersten beiden Werte in die zwei existrierenden Inputs füllen
-          var existingInputs = document.querySelectorAll("#input-container input.existing-input");
-          for (var i = 0; i < 2 && i < existingInputs.length && i < codes.length; i++) {
-            existingInputs[i].value = codes[i];
-          }
-          // Die ersten beiden Werte entfernen
-          codes.splice(0, 2);
-        }
+      
+      var newInputweight = document.createElement("input");
+      newInputweight.type = "number";
+      newInputweight.name = "code_weight[]";
+      newInputweight.value = "1";
 
+      inputContainer.appendChild(newInput);
+      inputContainer.appendChild(newInputweight);
+      var lineBreak = document.createElement("br");
+      inputContainer.appendChild(lineBreak);
       }
+
+function handleFileUpload() {
+  var fileInput = document.getElementById("file-input");
+  var file = fileInput.files[0];
+  var reader = new FileReader();
+  reader.readAsText(file);
+  reader.onload = function (event) {
+    var inputContainer = document.getElementById("input-container");
+    var codes = [];
+    var weights = [];
+    var secrets = [];
+    var text = event.target.result;
+    if (text.indexOf("[stashdrop") !== -1) {
+      // Shortcode format
+      codes = text.split("\n");
+for (var i = 0; i < codes.length; i++) {
+  var weight = 1;
+  var secret = "";
+  var commaIndex = codes[i].indexOf("]");
+  if (commaIndex !== -1) {
+    var weightStr = codes[i].substring(commaIndex + 1);
+    if (weightStr.trim() !== "") {
+      weight = parseInt(weightStr);
     }
+    codes[i] = codes[i].substring(0, commaIndex);
+  }
+  // Extrahiere den Wert des Secrets mit Regular Expressions
+  var secretRegex = /secret="(.*?)"/;
+  var match = codes[i].match(secretRegex);
+  if (match !== null) {
+    secret = match[1];
+  }
+  weights.push(weight);
+  secrets.push(secret);
+  if (i >= 2) {
+    // Nur neue Input-Felder füllen
+    var newInput = document.createElement("input");
+    newInput.type = "text";
+    newInput.name = "code[]";
+    newInput.value = secret;
+    var newInputweight = document.createElement("input");
+    newInputweight.type = "number";
+    newInputweight.name = "code_weight[]";
+    newInputweight.value = weight;
+    inputContainer.appendChild(newInput);
+    inputContainer.appendChild(newInputweight);
+    var lineBreak = document.createElement("br");
+    inputContainer.appendChild(lineBreak);
+  }
+}
+      // Die ersten beiden Werte in die zwei existrierenden Inputs füllen
+      var existingInputs = document.querySelectorAll("#input-container input.existing-input");
+      for (var i = 0; i < 2 && i < existingInputs.length && i < codes.length; i++) {
+        existingInputs[i].value = secrets[i];
+          };
+          var existingInputs = document.querySelectorAll("#input-container input.existing-weight");
+        for (var i = 0; i < 2 && i < existingInputs.length && i < codes.length; i++) {
+          existingInputs[i].value = weights[i];
+        }
+      // Die ersten beiden Werte entfernen
+      codes.splice(0, 2);
+      weights.splice(0, 2);
+    
+
+    } else {
+      // CSV format
+      codes = text.split("\n");
+      for (var i = 0; i < codes.length; i++) {
+  var weight = 1;
+  var commaIndex = codes[i].indexOf(",");
+  if (commaIndex !== -1) {
+    var weightStr = codes[i].substring(commaIndex + 1);
+    if (weightStr.trim() !== "") {
+      weight = parseInt(weightStr);
+    }
+    codes[i] = codes[i].substring(0, commaIndex);
+  }
+  weights.push(weight);
+        if (i >= 2) {
+          // Nur neue Input-Felder füllen
+          var newInput = document.createElement("input");
+          newInput.type = "text";
+          newInput.name = "code[]";
+          newInput.value = codes[i];
+          var newInputweight = document.createElement("input");
+          newInputweight.type = "number";
+          newInputweight.name = "code_weight[]";
+          newInputweight.value = weight;
+          inputContainer.appendChild(newInput);
+          inputContainer.appendChild(newInputweight);
+          var lineBreak = document.createElement("br");
+          inputContainer.appendChild(lineBreak);
+        }
+      }
+      // Die ersten beiden Werte in die zwei existrierenden Inputs füllen
+      var existingInputs = document.querySelectorAll("#input-container input.existing-input");
+      for (var i = 0; i < 2 && i < existingInputs.length && i < codes.length; i++) {
+        existingInputs[i].value = codes[i];
+          };
+          var existingInputs = document.querySelectorAll("#input-container input.existing-weight");
+        for (var i = 0; i < 2 && i < existingInputs.length && i < codes.length; i++) {
+          existingInputs[i].value = weights[i];
+        }
+      // Die ersten beiden Werte entfernen
+      codes.splice(0, 2);
+      weights.splice(0, 2);
+    }
+  }
+}
 
     // Existierende Inputs markieren
     var existingInputs = document.getElementsByName("code[]");
     for (var i = 0; i < existingInputs.length; i++) {
       existingInputs[i].classList.add("existing-input");
+    };
+
+    var existingInputs = document.getElementsByName("code_weight[]");
+    for (var i = 0; i < existingInputs.length; i++) {
+      existingInputs[i].classList.add("existing-weight");
     }
   </script>
 </body>
