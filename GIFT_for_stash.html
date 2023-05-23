@@ -16,8 +16,11 @@
     // Array für die Codes
     var codes = [];
 
-    // Hier die anzuzeigende Mitteilung einfügen
+    // angezeigte Optionen in der Frage
     var message = "Wähle mich!";
+	
+	// Mittelung zum Sammeln der Stash-Objekte
+	var pickup = "Sammle mich!"
 
     // Anzahl der zu generierenden Fragen
     var anzahl;
@@ -66,10 +69,11 @@ codes.splice(0, codeInputs.length);
           var addstr = "";
           if (j > 0) addstr = "~";
           var antwort = document.createElement("span");
-          antwort.innerHTML += addstr + "=Wähle mich!#";
+          antwort.innerHTML += addstr + "="+document.getElementById("optionen-beschriftung").value;
           var anzahl_stashdrop = document.getElementById("anzahl-stashdrop").value;
           for (var k = 0; k < anzahl_stashdrop; k++) {
-      antwort.innerHTML += "[stashdrop secret\\=\"" + codes[randnum(codes.length)] + "\" text\\=\"" + message + "\" image]";
+		  pickup = document.getElementById("pickup-mitteilung").value;
+      antwort.innerHTML += "#[stashdrop secret\\=\"" + codes[randnum(codes.length)] + "\" text\\=\"" + pickup + "\" image]";
     }
     antwort.innerHTML += "<br>";
           frage.appendChild(antwort);
@@ -97,7 +101,12 @@ codes.splice(0, codeInputs.length);
   <div id="input-container">
   <input type="text" name="code[]" value=""><input type="number" name="code_weight[]" value="1"><br><input type="text" name="code[]" value=""><input type="number" name="code_weight[]" value="1"><br></div></div><br>
   <button onclick="addInput()">Weiteren Code hinzufügen</button>
- 
+  <!-- Eingabefeld für die Beschriftung der Optionen -->
+  <p>Text für die einzelnen Optionen in der Fragestellung:</p>
+  <input id="optionen-beschriftung" type="text" value="Wähle mich!">
+    <!-- Eingabefeld für die Beschriftung der Optionen -->
+  <p>Text für das Einsammeln der Stash-Objekte:</p>
+  <input id="pickup-mitteilung" type="text" value="Sammle mich!">
   <!-- Auswahlfeld für die Anzahl der Antwortoptionen -->
   <p>Anzahl der Antwortoptionen:</p>
   <input id="optionen-auswahl" type="number" min="1" max="10" value="4">
