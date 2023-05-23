@@ -66,7 +66,12 @@ codes.splice(0, codeInputs.length);
           var addstr = "";
           if (j > 0) addstr = "~";
           var antwort = document.createElement("span");
-          antwort.innerHTML = addstr + "=Wähle mich!#[stashdrop secret\\=\"" + codes[randnum(codes.length)] + "\" text\\=\"" + message + "\" image]<br>";
+          antwort.innerHTML += addstr + "=Wähle mich!#";
+          var anzahl_stashdrop = document.getElementById("anzahl-stashdrop").value;
+          for (var k = 0; k < anzahl_stashdrop; k++) {
+      antwort.innerHTML += "[stashdrop secret\\=\"" + codes[randnum(codes.length)] + "\" text\\=\"" + message + "\" image]";
+    }
+    antwort.innerHTML += "<br>";
           frage.appendChild(antwort);
         }
         var endbr = document.createElement("span");
@@ -96,6 +101,9 @@ codes.splice(0, codeInputs.length);
   <!-- Auswahlfeld für die Anzahl der Antwortoptionen -->
   <p>Anzahl der Antwortoptionen:</p>
   <input id="optionen-auswahl" type="number" min="1" max="10" value="4">
+     <!-- Auswahlfeld für die Anzahl der Objekte pro Auswahl -->
+   <p>Anzahl der Objekte pro Option</p>
+   <input type="number" id="anzahl-stashdrop" name="anzahl-stashdrop" min="0" max="20" value="1">
  <!-- Auswahlfeld für die Anzahl der Fragen -->
   <p>Anzahl der zu generierenden Fragen:</p>
   <input id="anzahl-auswahl" type="number" min="1" max="30" value="10">
@@ -103,6 +111,7 @@ codes.splice(0, codeInputs.length);
   <button onclick="generateQuestions()">Fragen generieren</button>
   <!-- Container für die generierten Fragen -->
   <div id="fragen-container"></div>
+  
 
   <script>
 function addInput() {
