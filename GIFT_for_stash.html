@@ -69,11 +69,11 @@ codes.splice(0, codeInputs.length);
           var addstr = "";
           if (j > 0) addstr = "~";
           var antwort = document.createElement("span");
-          antwort.innerHTML += addstr + "="+document.getElementById("optionen-beschriftung").value;
+          antwort.innerHTML += addstr + "="+document.getElementById("optionen-beschriftung").value+"#";
           var anzahl_stashdrop = document.getElementById("anzahl-stashdrop").value;
           for (var k = 0; k < anzahl_stashdrop; k++) {
 		  pickup = document.getElementById("pickup-mitteilung").value;
-      antwort.innerHTML += "#[stashdrop secret\\=\"" + codes[randnum(codes.length)] + "\" text\\=\"" + pickup + "\" image]";
+      antwort.innerHTML += "[stashdrop secret\\=\"" + codes[randnum(codes.length)] + "\" text\\=\"" + pickup + "\" image]";
     }
     antwort.innerHTML += "<br>";
           frage.appendChild(antwort);
