@@ -40,14 +40,8 @@
       newInputweight.name = "code_weight[]";
       newInputweight.value = "1";
 
-      var newCheckbox = document.createElement("input");
-      newCheckbox.type = "checkbox";
-      newCheckbox.name = "use_code[]";
-      newCheckbox.checked = true;
-
       inputContainer.appendChild(newInput);
       inputContainer.appendChild(newInputweight);
-      inputContainer.appendChild(newCheckbox);
       var lineBreak = document.createElement("br");
       inputContainer.appendChild(lineBreak);
     }
@@ -57,24 +51,19 @@
       // Array mit den eingegebenen Codes und Gewichten erstellen
       var codeInputs = document.getElementsByName("code[]");
       var weightInputs = document.getElementsByName("code_weight[]");
-      var useCodeInputs = document.getElementsByName("use_code[]");
       var codes = [];
       var weights = [];
-      var useCodes = [];
 
-      // Codes, Gewichte und Verwendung aus den Input-Feldern auslesen und in Arrays speichern
+      // Codes und Gewichte aus den Input-Feldern auslesen und in Arrays speichern
       for (var i = 0; i < codeInputs.length; i++) {
         codes.push(codeInputs[i].value);
         weights.push(parseInt(weightInputs[i].value));
-        useCodes.push(useCodeInputs[i].checked);
       }
 
       // Anzahl der jeweiligen Codes um das entsprechende Gewicht erhöhen
       for (var i = 0; i < codes.length; i++) {
         for (var j = 0; j < weights[i]; j++) {
-          if (useCodes[i]) {
-            codes.push(codes[i]);
-          }
+          codes.push(codes[i]);
         }
       }
       console.log(codes);
@@ -86,7 +75,7 @@
       // Anzahl der Fragen aktualisieren
       anzahl = document.getElementById("anzahl-auswahl").value;
       // Checkbox-Status überprüfen
-      var noDuplicateobjects = document.getElementById("keine-doppelten-objekte").checked;
+      var keineDoppeltenObjekte = document.getElementById("keine-doppelten-objekte").checked;
       // Fragen generieren
       var fragenContainer = document.getElementById("fragen-container");
       fragenContainer.innerHTML = ""; // Löschen des Inhalts des Containers
@@ -104,13 +93,13 @@
 
           for (var k = 0; k < anzahl_stashdrop; k++) {
             pickup = document.getElementById("pickup-mitteilung").value;
-            var selectedCode = noDuplicateobjects ? removeRandomCode(codes) : codes[randnum(codes.length)];
+            var selectedCode = keineDoppeltenObjekte ? removeRandomCode(codes) : codes[randnum(codes.length)];
             selectedCodes.push(selectedCode);
             antwort.innerHTML += "[stashdrop secret=\"" + selectedCode + "\" text=\"" + pickup + "\" image]";
           }
           antwort.innerHTML += "<br>";
           frage.appendChild(antwort);
-          if (noDuplicateobjects) {
+          if (keineDoppeltenObjekte) {
             // Füge die verwendeten Codes zurück in das Array ein
             codes = codes.concat(selectedCodes);
           }
@@ -146,8 +135,8 @@
   <!-- Inputfelder für die Codes -->
   <div style="display: flex">
     <div id="input-container">
-      <input type="text" name="code[]" value=""><input type="number" name="code_weight[]" value="1"><input type="checkbox" name="use_code[]" checked><br>
-      <input type="text" name="code[]" value=""><input type="number" name="code_weight[]" value="1"><input type="checkbox" name="use_code[]" checked><br>
+      <input type="text" name="code[]" value=""><input type="number" name="code_weight[]" value="1"><br>
+      <input type="text" name="code[]" value=""><input type="number" name="code_weight[]" value="1"><br>
     </div>
   </div><br>
   <button onclick="addInput()">Weiteren Code hinzufügen</button>
@@ -164,7 +153,7 @@
   <p>Anzahl der Objekte pro Option</p>
   <input type="number" id="anzahl-stashdrop" name="anzahl-stashdrop" min="0" max="20" value="1">
   <!-- Checkbox für keine doppelten Objekte -->
-  <p><input type="checkbox" id="keine-doppelten-objekte"> Keine doppelten Objekte pro Option (gilt nur wenn Gewichtung = 1 )</p>
+  <p><input type="checkbox" id="keine-doppelten-objekte"> Keine doppelten Objekte pro Option</p>
   <!-- Auswahlfeld für die Anzahl der Fragen -->
   <p>Anzahl der zu generierenden Fragen:</p>
   <input id="anzahl-auswahl" type="number" min="1" max="30" value="10">
@@ -173,5 +162,144 @@
   <!-- Container für die generierten Fragen -->
   <div id="fragen-container"></div>
 
+
+  <script>
+    function addInput() {
+          var inputContainer = document.getElementById("input-container");
+          var newInput = document.createElement("input");
+          newInput.type = "text";
+          newInput.name = "code[]";
+          
+          var newInputweight = document.createElement("input");
+          newInputweight.type = "number";
+          newInputweight.name = "code_weight[]";
+          newInputweight.value = "1";
+    
+          inputContainer.appendChild(newInput);
+          inputContainer.appendChild(newInputweight);
+          var lineBreak = document.createElement("br");
+          inputContainer.appendChild(lineBreak);
+          }
+    
+    function handleFileUpload() {
+      var fileInput = document.getElementById("file-input");
+      var file = fileInput.files[0];
+      var reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = function (event) {
+        var inputContainer = document.getElementById("input-container");
+        var codes = [];
+        var weights = [];
+        var secrets = [];
+        var text = event.target.result;
+        if (text.indexOf("[stashdrop") !== -1) {
+          // Shortcode format
+          codes = text.split("\n");
+    for (var i = 0; i < codes.length; i++) {
+      var weight = 1;
+      var secret = "";
+      var commaIndex = codes[i].indexOf("]");
+      if (commaIndex !== -1) {
+        var weightStr = codes[i].substring(commaIndex + 1);
+        if (weightStr.trim() !== "") {
+          weight = parseInt(weightStr);
+        }
+        codes[i] = codes[i].substring(0, commaIndex);
+      }
+      // Extrahiere den Wert des Secrets mit Regular Expressions
+      var secretRegex = /secret="(.*?)"/;
+      var match = codes[i].match(secretRegex);
+      if (match !== null) {
+        secret = match[1];
+      }
+      weights.push(weight);
+      secrets.push(secret);
+      if (i >= 2) {
+        // Nur neue Input-Felder füllen
+        var newInput = document.createElement("input");
+        newInput.type = "text";
+        newInput.name = "code[]";
+        newInput.value = secret;
+        var newInputweight = document.createElement("input");
+        newInputweight.type = "number";
+        newInputweight.name = "code_weight[]";
+        newInputweight.value = weight;
+        inputContainer.appendChild(newInput);
+        inputContainer.appendChild(newInputweight);
+        var lineBreak = document.createElement("br");
+        inputContainer.appendChild(lineBreak);
+      }
+    }
+          // Die ersten beiden Werte in die zwei existrierenden Inputs füllen
+          var existingInputs = document.querySelectorAll("#input-container input.existing-input");
+          for (var i = 0; i < 2 && i < existingInputs.length && i < codes.length; i++) {
+            existingInputs[i].value = secrets[i];
+              };
+              var existingInputs = document.querySelectorAll("#input-container input.existing-weight");
+            for (var i = 0; i < 2 && i < existingInputs.length && i < codes.length; i++) {
+              existingInputs[i].value = weights[i];
+            }
+          // Die ersten beiden Werte entfernen
+          codes.splice(0, 2);
+          weights.splice(0, 2);
+        
+    
+        } else {
+          // CSV format
+          codes = text.split("\n");
+          for (var i = 0; i < codes.length; i++) {
+      var weight = 1;
+      var commaIndex = codes[i].indexOf(",");
+      if (commaIndex !== -1) {
+        var weightStr = codes[i].substring(commaIndex + 1);
+        if (weightStr.trim() !== "") {
+          weight = parseInt(weightStr);
+        }
+        codes[i] = codes[i].substring(0, commaIndex);
+      }
+      weights.push(weight);
+            if (i >= 2) {
+              // Nur neue Input-Felder füllen
+              var newInput = document.createElement("input");
+              newInput.type = "text";
+              newInput.name = "code[]";
+              newInput.value = codes[i];
+              var newInputweight = document.createElement("input");
+              newInputweight.type = "number";
+              newInputweight.name = "code_weight[]";
+              newInputweight.value = weight;
+              inputContainer.appendChild(newInput);
+              inputContainer.appendChild(newInputweight);
+              var lineBreak = document.createElement("br");
+              inputContainer.appendChild(lineBreak);
+            }
+          }
+          // Die ersten beiden Werte in die zwei existrierenden Inputs füllen
+          var existingInputs = document.querySelectorAll("#input-container input.existing-input");
+          for (var i = 0; i < 2 && i < existingInputs.length && i < codes.length; i++) {
+            existingInputs[i].value = codes[i];
+              };
+              var existingInputs = document.querySelectorAll("#input-container input.existing-weight");
+            for (var i = 0; i < 2 && i < existingInputs.length && i < codes.length; i++) {
+              existingInputs[i].value = weights[i];
+            }
+          // Die ersten beiden Werte entfernen
+          codes.splice(0, 2);
+          weights.splice(0, 2);
+        }
+      }
+    }
+    
+        // Existierende Inputs markieren
+        var existingInputs = document.getElementsByName("code[]");
+        for (var i = 0; i < existingInputs.length; i++) {
+          existingInputs[i].classList.add("existing-input");
+        };
+    
+        var existingInputs = document.getElementsByName("code_weight[]");
+        for (var i = 0; i < existingInputs.length; i++) {
+          existingInputs[i].classList.add("existing-weight");
+        }
+      </script>
 </body>
 </html>
